@@ -1,0 +1,27 @@
+{
+  "name": "hattrick_nt_analyzer",
+  "version": "1.0.0",
+  "description": "Web application made to analyze national teams in Hattrick.org, the legendary football manager game",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon dist/app.js"
+  },
+  "author": "Jan 'Arcanus' Majerníček",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.2",
+    "mongoose": "^6.1.8",
+    "multer": "^1.4.4",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/mongoose": "^5.11.97",
+    "@types/multer": "^1.4.7",
+    "@types/node": "^17.0.13",
+    "@types/nodemon": "^1.19.1",
+    "@types/uuid": "^8.3.4",
+    "nodemon": "^2.0.15"
+  }
+}
