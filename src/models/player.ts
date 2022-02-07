@@ -2,12 +2,12 @@ import mongoose from 'mongoose'
 const Schema = mongoose.Schema
 
 export interface PlayerType {
-    nationality: String;
-    name: String;
+    nationality: string;
+    name: string;
     ht_id: number;
-    speciality?: String;
-    injury?: Number;
-    onTL?: String;
+    speciality?: string;
+    injury?: number;
+    onTL?: string;
     age_years: number;
     age_days: number;
     TSI: number;

@@ -2,10 +2,11 @@ import fs from "fs";
 
 import { RequestHandler } from "express";
 import csv from "csv-parser";
-import { normalizeKeys } from "object-keys-normalizer";
 
 import Player, { PlayerType } from "../models/player";
+import { transformTeamData } from "../util/team-data-transformer";
 import Team from "../models/team";
+import team from "../models/team";
 
 export const getTeams: RequestHandler = async (req, res, next) => {
     const teams = Team.find();
@@ -31,119 +32,58 @@ export const uploadCsvFile: RequestHandler = async (req, res, next) => {
     fs.createReadStream(fileUrl)
         .pipe(csv())
         .on("data", (data) => {
-            teamRaw.push(data)
+            teamRaw.push(data);
+            console.log(data);
         })
         .on("end", () => {
-            const team: PlayerType[] = transformTeamData(teamRaw);
-            res.status(201).json({
-                message: "Csv File uploaded and processed successfully",
-                team: team
-            });
+            if(teamRaw.length == 0){
+                res.status(204).json({
+                    message: "No data found in provided file"
+                });
+            } else {
+                const team: PlayerType[] = transformTeamData(teamRaw);
+                insertPlayersIntoDb(team);
+                fs.unlinkSync(fileUrl);
+                res.status(201).json({
+                    message: "Csv File uploaded and processed successfully",
+                    team: team
+                });
+            }
         });
 };
 
-function transformTeamData (inputTeam: object[]) {
-    const team: PlayerType[] = []; // will store our result there
-    for (let inputPlayer of inputTeam) {
-        // Need to create an "empty" player so that it doesn't shout at me
-        let player: PlayerType = {
-            nationality: '',
-            name: '',
-            ht_id: 0,
-            age_years: 0,
-            age_days: 0,
-            TSI: 0,
-            experience: 0,
-            leadership: 0,
-            form: [],
-            stamina: [],
-            NTmatches: 0,
-            U21matches: 0,
-            isInTeam: false
-        };
-        // Loop through all key and assign to the new "player" with normal key names
-        for (let key in inputPlayer) {
-            if (hasKey(inputPlayer, key)) {
-                switch(key){
-                    case 'Vlast':
-                        player.nationality = inputPlayer[key];
-                        break;
-                    case 'Jméno':
-                        player.name = inputPlayer[key];
-                        break;
-                    case 'ID hráče':
-                        player.ht_id = inputPlayer[key];
-                        break;
-                    case 'Specialita':
-                        // need to create transform speciality function
-                        player.speciality = inputPlayer[key];
-                        break;
-                    case 'Zranění':
-                        player.injury = inputPlayer[key];
-                        break;
-                    case 'Na přestupové listině':
-                        player.onTL = inputPlayer[key];
-                        break;
-                    case 'Věk':
-                        player.age_years = inputPlayer[key];
-                        break;
-                    case 'dní':
-                        player.age_days = inputPlayer[key];
-                        break;
-                    case 'TSI':
-                        player.TSI = inputPlayer[key];
-                        break;
-                    case 'Zkušenost':
-                        player.experience = inputPlayer[key];
-                        break;
-                    case 'Vůdcovství':
-                        player.leadership = inputPlayer[key];
-                        break;
-                    case 'Forma': 
-                        player.form.push(inputPlayer[key]);
-                        break;
-                    case 'Kondice':
-                        player.stamina.push(inputPlayer[key]);
-                        break;
-                    case 'Chytání':
-                        player.goalkeeping = inputPlayer[key];
-                        break;
-                    case 'Bránění':
-                        player.defending = inputPlayer[key];
-                        break;
-                    case 'Tvorba hry':
-                        player.playmaking = inputPlayer[key];
-                        break;
-                    case 'Křídlo':
-                        player.winger = inputPlayer[key];
-                        break;
-                    case 'Přihrávky':
-                        player.passing = inputPlayer[key];
-                        break;
-                    case 'Zakončování':
-                        player.scoring = inputPlayer[key];
-                        break;
-                    case 'Standardky':
-                        player.setPieces = inputPlayer[key];
-                        break;
-                    case 'Zápasy za Národní tým':
-                        player.NTmatches = inputPlayer[key];
-                        break;
-                    case 'Zápasy za NT U21':
-                        player.U21matches = inputPlayer[key];
-                        break;
-                    case 'Hráč národního týmu!':
-                        player.isInTeam = inputPlayer[key] as boolean;
-                        break;
-                }
-            }
+async function insertPlayersIntoDb(team: PlayerType[]){
+    // Decide team category, refactor into separate function maybe later
+    let category: String = 'U21';
+    let averageAge: number = 0;
+    for(let player of team){
+        if(player.NTmatches > 0){
+            category = 'NT';
+            break;
         }
-        team.push(player);
+        averageAge += (player.age_years * 112 + player.age_days);
     }
-    return team;
-}
+    averageAge = (averageAge / 112) / team.length;
+    if( averageAge > 22 && category === 'U21'){
+        category = 'NT';
+    };
+    
+    // If nation already in the db, find and update
+    const nationality = team[0].nationality;
+    const existingTeam = await Team.find({country: nationality, category: category});
+    console.log(existingTeam);
+    if(existingTeam.length > 0){
+        console.log('This team already exists');
+        // Update players and team solution to be done
+    } else{
+        // Create & insert into db
+        //Need to create players first
+        // console.log(nationality + '' + category);
+        const newTeam = new Team({
+            country: nationality,
+            category: category
+        });
+        await newTeam.save();
+    }
 
-// Googled function to make for-in loop above work, try to understand it later
-function hasKey<O>(obj: O, key: PropertyKey): key is keyof O {
-    return key in obj
-}
+};
