@@ -1,7 +1,39 @@
 import mongoose from 'mongoose'
 const Schema = mongoose.Schema
 
-const playerSchema = new Schema({
+export interface PlayerType {
+    nationality: String;
+    name: String;
+    ht_id: number;
+    speciality?: String;
+    injury?: Number;
+    onTL?: String;
+    age_years: number;
+    age_days: number;
+    TSI: number;
+    experience: number;
+    leadership: number;
+    form: number[];
+    stamina: number[];
+    NTmatches: number;
+    U21matches: number;
+    isInTeam: boolean;
+    comment?: string;
+    goalkeeping?: number;
+    defending?: number;
+    playmaking?: number;
+    winger?: number;
+    passing?: number;
+    scoring?: number;
+    setPieces?: number;
+    team?: object;
+};
+
+const playerSchema = new Schema<PlayerType>({
+    nationality: {
+        type: String,
+        required: true
+    },
     name: {
         type: String,
         required: true
@@ -68,6 +100,6 @@ const playerSchema = new Schema({
     }
 },{
     timestamps: true
-})
+});
 
-export default mongoose.model('Player', playerSchema)
+export default mongoose.model<PlayerType>('Player', playerSchema);

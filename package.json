@@ -10,9 +10,11 @@
   "author": "Jan 'Arcanus' Majerníček",
   "license": "ISC",
   "dependencies": {
+    "csv-parser": "^3.0.0",
     "express": "^4.17.2",
     "mongoose": "^6.1.8",
     "multer": "^1.4.4",
+    "object-keys-normalizer": "^1.0.1",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
