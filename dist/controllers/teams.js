@@ -15,8 +15,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploadCsvFile = exports.getTeams = void 0;
 const fs_1 = __importDefault(require("fs"));
 const csv_parser_1 = __importDefault(require("csv-parser"));
+const player_1 = __importDefault(require("../models/player"));
 const team_data_transformer_1 = require("../util/team-data-transformer");
 const team_1 = __importDefault(require("../models/team"));
+const translate_countries_1 = require("../util/translate-countries");
 const getTeams = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const teams = team_1.default.find();
     if (!teams) {
@@ -42,9 +44,10 @@ const uploadCsvFile = (req, res, next) => __awaiter(void 0, void 0, void 0, func
         .pipe((0, csv_parser_1.default)())
         .on("data", (data) => {
         teamRaw.push(data);
-        console.log(data);
+        // console.log(data);
     })
         .on("end", () => {
+        fs_1.default.unlinkSync(fileUrl);
         if (teamRaw.length == 0) {
             res.status(204).json({
                 message: "No data found in provided file"
@@ -52,8 +55,7 @@ const uploadCsvFile = (req, res, next) => __awaiter(void 0, void 0, void 0, func
         }
         else {
             const team = (0, team_data_transformer_1.transformTeamData)(teamRaw);
-            insertPlayersIntoDb(team);
-            fs_1.default.unlinkSync(fileUrl);
+            insertTeamIntoDb(team);
             res.status(201).json({
                 message: "Csv File uploaded and processed successfully",
                 team: team
@@ -62,7 +64,7 @@ const uploadCsvFile = (req, res, next) => __awaiter(void 0, void 0, void 0, func
     });
 });
 exports.uploadCsvFile = uploadCsvFile;
-function insertPlayersIntoDb(team) {
+function insertTeamIntoDb(team) {
     return __awaiter(this, void 0, void 0, function* () {
         // Decide team category, refactor into separate function maybe later
         let category = 'U21';
@@ -80,9 +82,13 @@ function insertPlayersIntoDb(team) {
         }
         ;
         // If nation already in the db, find and update
-        const nationality = team[0].nationality;
+        let nationality = team[0].nationality;
+        // Translate country name to English (works only for Czech lang. now)
+        if (translate_countries_1.CountryTranslation[nationality]) {
+            nationality = translate_countries_1.CountryTranslation[nationality];
+        }
         const existingTeam = yield team_1.default.find({ country: nationality, category: category });
-        console.log(existingTeam);
+        // console.log(existingTeam);
         if (existingTeam.length > 0) {
             console.log('This team already exists');
             // Update players and team solution to be done
@@ -95,6 +101,36 @@ function insertPlayersIntoDb(team) {
                 country: nationality,
                 category: category
             });
+            for (let player of team) {
+                let newPlayer = new player_1.default({
+                    nationality: nationality,
+                    name: player.name,
+                    ht_id: player.ht_id,
+                    speciality: player.speciality,
+                    injury: player.injury,
+                    onTL: player.onTL,
+                    age_days: player.age_days,
+                    age_years: player.age_years,
+                    TSI: player.TSI,
+                    experience: player.experience,
+                    leadership: player.leadership,
+                    form: player.form,
+                    stamina: player.stamina,
+                    NTmatches: player.NTmatches,
+                    U21matches: player.U21matches,
+                    isInTeam: player.isInTeam,
+                    goalkeeping: player.goalkeeping,
+                    defending: player.defending,
+                    playmaking: player.playmaking,
+                    winger: player.winger,
+                    passing: player.passing,
+                    scoring: player.scoring,
+                    setPieces: player.setPieces,
+                    team: newTeam._id
+                });
+                newTeam.players.push(newPlayer);
+                yield newPlayer.save();
+            }
             yield newTeam.save();
         }
     });
