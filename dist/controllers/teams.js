@@ -20,16 +20,23 @@ const team_data_transformer_1 = require("../util/team-data-transformer");
 const team_1 = __importDefault(require("../models/team"));
 const translate_countries_1 = require("../util/translate-countries");
 const getTeams = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const teams = team_1.default.find();
-    if (!teams) {
+    const teams = yield team_1.default.find();
+    if (!teams || teams.length === 0) {
         const error = new Error("No teams in the database");
         res.status(404);
         next(error);
     }
-    res.status(200).json({
-        message: "List of teams successfully fetched",
-        teams: teams,
-    });
+    else {
+        const populatedTeams = [];
+        for (let team of teams) {
+            let populatedTeam = yield team.populate('players');
+            populatedTeams.push(populatedTeam);
+        }
+        res.status(200).json({
+            message: "List of teams successfully fetched",
+            teams: populatedTeams,
+        });
+    }
 });
 exports.getTeams = getTeams;
 const uploadCsvFile = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {

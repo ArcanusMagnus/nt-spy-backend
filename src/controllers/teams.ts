@@ -6,21 +6,25 @@ import csv from "csv-parser";
 import Player, { PlayerType } from "../models/player";
 import { transformTeamData } from "../util/team-data-transformer";
 import Team, { teamType } from "../models/team";
-import team from "../models/team";
 import { CountryTranslation, TranslationObject } from "../util/translate-countries";
-import { Mongoose } from "mongoose";
 
 export const getTeams: RequestHandler = async (req, res, next) => {
-    const teams = Team.find();
-    if (!teams) {
+    const teams = await Team.find();
+    if (!teams || teams.length === 0) {
         const error = new Error("No teams in the database");
         res.status(404);
         next(error);
+    } else {
+        const populatedTeams: teamType[] = [];
+        for (let team of teams){
+            let populatedTeam: teamType = await team.populate('players');
+            populatedTeams.push(populatedTeam);
+        }
+        res.status(200).json({
+            message: "List of teams successfully fetched",
+            teams: populatedTeams,
+        });
     }
-    res.status(200).json({
-        message: "List of teams successfully fetched",
-        teams: teams,
-    });
 };
 
 export const uploadCsvFile: RequestHandler = async (req, res, next) => {
