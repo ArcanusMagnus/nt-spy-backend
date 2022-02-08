@@ -27,6 +27,8 @@ export interface PlayerType {
     scoring?: number;
     setPieces?: number;
     team?: object;
+    updatedAt?: Date;
+    createdAt?: Date;
 };
 
 const playerSchema = new Schema<PlayerType>({

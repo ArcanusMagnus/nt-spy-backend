@@ -16,7 +16,8 @@ const teamSchema = new Schema({
     },
     players: [{
             type: Schema.Types.ObjectId,
-            ref: 'Player'
+            ref: 'Player',
+            default: []
         }]
 });
 exports.default = mongoose_1.default.model('Team', teamSchema);

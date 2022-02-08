@@ -1,7 +1,14 @@
 import mongoose from 'mongoose'
+import { PlayerType } from './player'
 const Schema = mongoose.Schema
 
-const teamSchema = new Schema({
+export interface teamType {
+    country: string;
+    category: string;
+    players: PlayerType[]
+}
+
+const teamSchema = new Schema<teamType>({
     country: {
         type: String,
         required: true
@@ -12,8 +19,9 @@ const teamSchema = new Schema({
     },
     players: [{
         type: Schema.Types.ObjectId,
-        ref: 'Player'
+        ref: 'Player',
+        default: []
     }]
 })
 
-export default mongoose.model('Team', teamSchema)
+export default mongoose.model<teamType>('Team', teamSchema)
