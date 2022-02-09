@@ -5,12 +5,14 @@ import path from "path";
 import express, { NextFunction } from "express";
 import mongoose, { Error } from "mongoose";
 import multer from "multer";
+import bodyParser from "body-parser";
 
 // Custom imports
 import { fileStorage, fileFilter } from "./util/uploader";
 
 // Routes
 import teamRoutes from './routes/teams';
+import playerRoutes from './routes/players';
 
 // Variables
 const MONGODB_URI = 'mongodb+srv://arcanus:LL5!JYMcQnS7!at@cluster0.tlpvc.mongodb.net/ht-tool?retryWrites=true&w=majority';
@@ -20,6 +22,7 @@ const staticDataPath = path.join(__dirname, 'data');
 // Middleware
 app.use(multer({storage: fileStorage, fileFilter: fileFilter}).single('csv'));
 app.use('/data', express.static(staticDataPath));
+app.use(bodyParser.json());
 
 // Headers
 app.use((req, res, next) => {
@@ -31,6 +34,7 @@ app.use((req, res, next) => {
 
 // Route Handling
 app.use('/', teamRoutes);
+app.use('/player', playerRoutes);
 
 // Error handling: TODO
 // app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
