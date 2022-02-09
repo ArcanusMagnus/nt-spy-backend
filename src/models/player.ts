@@ -27,6 +27,8 @@ export interface PlayerType {
     scoring?: number;
     setPieces?: number;
     team?: object;
+    position?: string;
+    salary?: number;
     updatedAt?: Date;
     createdAt?: Date;
 };
@@ -95,11 +97,14 @@ const playerSchema = new Schema<PlayerType>({
     passing: Number,
     scoring: Number,
     setPieces: Number,
+    // need to store all update times
     team: {
         type: Schema.Types.ObjectId,
         ref: 'Team',
         required: true
-    }
+    },
+    salary: Number,
+    position: String
 },{
     timestamps: true
 });

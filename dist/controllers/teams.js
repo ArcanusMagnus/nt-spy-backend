@@ -58,6 +58,7 @@ const getOneTeam = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
 });
 exports.getOneTeam = getOneTeam;
 // Upload CSV exported from Hattrick - a lot more security and error handling stuff to do
+// Maybe needs a cleanup function - compare old IDs with new ones and delete players who are not in the list anymore
 const uploadCsvFile = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req.file) {
         const error = new Error("No file provided");

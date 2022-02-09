@@ -70,11 +70,14 @@ const playerSchema = new Schema({
     passing: Number,
     scoring: Number,
     setPieces: Number,
+    // need to store all update times
     team: {
         type: Schema.Types.ObjectId,
         ref: 'Team',
         required: true
-    }
+    },
+    salary: Number,
+    position: String
 }, {
     timestamps: true
 });

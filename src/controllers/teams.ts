@@ -46,6 +46,7 @@ export const getOneTeam: RequestHandler = async (req, res, next) => {
 };
 
 // Upload CSV exported from Hattrick - a lot more security and error handling stuff to do
+// Maybe needs a cleanup function - compare old IDs with new ones and delete players who are not in the list anymore
 export const uploadCsvFile: RequestHandler = async (req, res, next) => {
     if (!req.file) {
         const error = new Error("No file provided");
