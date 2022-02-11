@@ -11,11 +11,12 @@ function transformTeamData(inputTeam) {
             ht_id: 0,
             age_years: 0,
             age_days: 0,
-            TSI: 0,
+            TSI: [],
             experience: 0,
             leadership: 0,
             form: [],
             stamina: [],
+            updates: [],
             NTmatches: 0,
             U21matches: 0,
             isInTeam: false
@@ -23,7 +24,6 @@ function transformTeamData(inputTeam) {
         // Loop through all key and assign to the new "player" with normal key names
         for (let key in inputPlayer) {
             if (hasKey(inputPlayer, key)) {
-                // console.log(key);
                 switch (key) {
                     case 'Vlast':
                     case 'Nationality':
@@ -39,7 +39,8 @@ function transformTeamData(inputTeam) {
                         break;
                     case 'Specialita':
                     case 'Speciality':
-                        player.speciality = inputPlayer[key];
+                        // translate the speciality into its letter shortcut (works for CZ and EN only)
+                        player.speciality = specialityShortcut(inputPlayer[key]);
                         break;
                     case 'Zranění ':
                     case 'Injuries ':
@@ -58,7 +59,7 @@ function transformTeamData(inputTeam) {
                         player.age_days = +inputPlayer[key];
                         break;
                     case 'TSI':
-                        player.TSI = +inputPlayer[key];
+                        player.TSI.push(+inputPlayer[key]);
                         break;
                     case 'Zkušenost':
                     case 'Experience':
@@ -122,11 +123,10 @@ function transformTeamData(inputTeam) {
                 }
             }
         }
-        // Here we assume we got a correct file - needs error handling
-        team.push(player);
-        // console.log(player);
+        player.updates.push(new Date());
+        // Let's say this is error handling (lol) - can't figure out anything better
         if (player.nationality === '' ||
-            player.TSI === 0 ||
+            player.TSI[0] === 0 ||
             player.ht_id === 0 ||
             player.age_years === 0 ||
             player.experience === 0 ||
@@ -134,6 +134,7 @@ function transformTeamData(inputTeam) {
             console.log('Error - false data');
             throw new Error('Error - false data');
         }
+        team.push(player);
     }
     return team;
 }
@@ -141,4 +142,40 @@ exports.transformTeamData = transformTeamData;
 // Googled function to make for-in loop above work, try to understand it later
 function hasKey(obj, key) {
     return key in obj;
+}
+function specialityShortcut(speciality) {
+    let specShort;
+    switch (speciality) {
+        case 'Hlavičkář':
+        case 'Head':
+            specShort = 'H';
+            break;
+        case 'Rychlý':
+        case 'Quick':
+            specShort = 'Q';
+            break;
+        case 'Technický':
+        case 'Technical':
+            specShort = 'T';
+            break;
+        case 'Nepředvídatelný':
+        case 'Unpredictable':
+            specShort = 'U';
+            break;
+        case 'Silový':
+        case 'Powerful':
+            specShort = 'P';
+            break;
+        case 'Houževnatý':
+        case 'Resilient':
+            specShort = 'R';
+            break;
+        case 'Týmový hráč':
+        case 'Support':
+            specShort = 'TP';
+            break;
+        default:
+            specShort = '';
+    }
+    return specShort;
 }

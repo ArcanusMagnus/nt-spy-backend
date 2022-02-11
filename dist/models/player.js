@@ -30,10 +30,10 @@ const playerSchema = new Schema({
         type: Number,
         required: true
     },
-    TSI: {
-        type: Number,
-        required: true
-    },
+    TSI: [{
+            type: Number,
+            required: true
+        }],
     experience: {
         type: Number,
         required: true
@@ -77,7 +77,16 @@ const playerSchema = new Schema({
         required: true
     },
     salary: Number,
-    position: String
+    position: String,
+    updates: [{
+            type: Date,
+            default: []
+        }],
+    hidden: {
+        type: Boolean,
+        default: false
+    },
+    expiry: String
 }, {
     timestamps: true
 });

@@ -1,6 +1,8 @@
 import mongoose from 'mongoose'
 const Schema = mongoose.Schema
 
+export type Position = "GK" | "CD" | "CDo" | "CDtW" | "CAsp" | "WB" | "WBo" | "WBd" | "WBtM" | "SPt" | "IM" | "IMtW" | "DIM" | "PDIM" | "IMo" | "W" | "Woff" | "Wdef" | "WtM" | "F" | "FtW" | "TDF" | "PNF" | "lol";
+
 export interface PlayerType {
     nationality: string;
     name: string;
@@ -10,7 +12,7 @@ export interface PlayerType {
     onTL?: string;
     age_years: number;
     age_days: number;
-    TSI: number;
+    TSI: number[];
     experience: number;
     leadership: number;
     form: number[];
@@ -27,8 +29,11 @@ export interface PlayerType {
     scoring?: number;
     setPieces?: number;
     team?: object;
-    position?: string;
+    position?: Position;
     salary?: number;
+    hidden?: boolean;
+    expiry?: string;
+    updates: Date[];
     updatedAt?: Date;
     createdAt?: Date;
 };
@@ -57,10 +62,10 @@ const playerSchema = new Schema<PlayerType>({
         type: Number,
         required: true
     },
-    TSI: {
+    TSI: [{
         type: Number,
         required: true
-    },
+    }],
     experience: {
         type: Number,
         required: true
@@ -104,7 +109,16 @@ const playerSchema = new Schema<PlayerType>({
         required: true
     },
     salary: Number,
-    position: String
+    position: String,
+    updates: [{
+        type: Date,
+        default: []
+    }],
+    hidden: {
+        type: Boolean,
+        default: false
+    },
+    expiry: String
 },{
     timestamps: true
 });

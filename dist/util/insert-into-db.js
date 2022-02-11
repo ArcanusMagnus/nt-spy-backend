@@ -16,6 +16,7 @@ exports.insertTeamIntoDb = void 0;
 const team_1 = __importDefault(require("../models/team"));
 const player_1 = __importDefault(require("../models/player"));
 const translate_countries_1 = require("./translate-countries");
+const actual_age_1 = require("./actual-age");
 const insertTeamIntoDb = (team) => __awaiter(void 0, void 0, void 0, function* () {
     // Decide team category, refactor into separate function maybe later
     let category = 'U21';
@@ -51,10 +52,11 @@ const insertTeamIntoDb = (team) => __awaiter(void 0, void 0, void 0, function* (
                     // update old player
                     oldPlayerData.injury = player.injury;
                     oldPlayerData.onTL = player.onTL;
-                    oldPlayerData.TSI = player.TSI;
+                    oldPlayerData.TSI.push(player.TSI[0]);
                     oldPlayerData.experience = player.experience;
                     oldPlayerData.form.push(player.form[0]);
                     oldPlayerData.stamina.push(player.stamina[0]);
+                    oldPlayerData.updates.push(player.updates[0]);
                     oldPlayerData.NTmatches = player.NTmatches;
                     oldPlayerData.U21matches = player.U21matches;
                     oldPlayerData.isInTeam = player.isInTeam;
@@ -97,6 +99,8 @@ const insertTeamIntoDb = (team) => __awaiter(void 0, void 0, void 0, function* (
                     passing: player.passing,
                     scoring: player.scoring,
                     setPieces: player.setPieces,
+                    updates: player.updates,
+                    expiry: (0, actual_age_1.calculateExpiry)(player.age_years, player.age_days),
                     team: existingTeam._id
                 });
                 newPlayer.save();
@@ -139,6 +143,8 @@ const insertTeamIntoDb = (team) => __awaiter(void 0, void 0, void 0, function* (
                 passing: player.passing,
                 scoring: player.scoring,
                 setPieces: player.setPieces,
+                updates: player.updates,
+                expiry: (0, actual_age_1.calculateExpiry)(player.age_years, player.age_days),
                 team: newTeam._id
             });
             // Store players and their reference into the team

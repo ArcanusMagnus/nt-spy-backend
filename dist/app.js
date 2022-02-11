@@ -15,6 +15,7 @@ const uploader_1 = require("./util/uploader");
 // Routes
 const teams_1 = __importDefault(require("./routes/teams"));
 const players_1 = __importDefault(require("./routes/players"));
+const error_handler_1 = require("./util/error-handler");
 // Variables
 const MONGODB_URI = 'mongodb+srv://arcanus:LL5!JYMcQnS7!at@cluster0.tlpvc.mongodb.net/ht-tool?retryWrites=true&w=majority';
 const app = (0, express_1.default)();
@@ -33,12 +34,8 @@ app.use((req, res, next) => {
 // Route Handling
 app.use('/', teams_1.default);
 app.use('/player', players_1.default);
-// Error handling: TODO
-// app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
-//     res.json({
-//         message: error.message;
-//     });
-// });
+// Error handling
+app.use(error_handler_1.generalErrorHandler);
 // DB connection
 mongoose_1.default
     .connect(MONGODB_URI)

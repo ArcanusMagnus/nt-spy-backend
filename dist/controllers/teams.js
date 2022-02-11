@@ -12,49 +12,50 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadCsvFile = exports.getOneTeam = exports.getTeams = void 0;
+exports.deleteTeam = exports.uploadCsvFile = exports.getOneTeam = exports.getTeams = void 0;
 const fs_1 = __importDefault(require("fs"));
 const csv_parser_1 = __importDefault(require("csv-parser"));
+const player_1 = __importDefault(require("../models/player"));
 const team_data_transformer_1 = require("../util/team-data-transformer");
 const team_1 = __importDefault(require("../models/team"));
 const insert_into_db_1 = require("../util/insert-into-db");
+const actual_age_1 = require("../util/actual-age");
 // Simply get list of all teams
 const getTeams = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const teams = yield team_1.default.find();
     if (!teams || teams.length === 0) {
         const error = new Error("No teams in the database");
         res.status(404);
-        next(error);
+        return next(error);
     }
-    else {
-        res.status(200).json({
-            message: "List of teams successfully fetched",
-            teams: teams
-        });
-    }
+    res.status(200).json({
+        message: "List of teams successfully fetched",
+        teams: teams
+    });
 });
 exports.getTeams = getTeams;
 // Get one team by ID and populate it by player data
 const getOneTeam = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!req.params) {
+    if (!req.params.teamId || !req.params.teamId.match(/^[0-9a-fA-F]{24}$/)) {
         const error = new Error("Invalid URL");
         res.status(400);
-        next(error);
+        return next(error);
     }
     // TODO: This throws unhandled error if id wrong
     const team = yield team_1.default.findById(req.params.teamId);
     if (!team) {
         const error = new Error("Team not found");
         res.status(404);
-        next(error);
+        return next(error);
     }
-    else {
-        const populatedTeam = yield team.populate('players');
-        res.status(200).json({
-            message: "Team successfully fetched",
-            team: populatedTeam
-        });
+    const populatedTeam = yield team.populate('players');
+    for (let player of populatedTeam.players) {
+        (0, actual_age_1.calculateAge)(player);
     }
+    res.status(200).json({
+        message: "Team successfully fetched",
+        team: populatedTeam
+    });
 });
 exports.getOneTeam = getOneTeam;
 // Upload CSV exported from Hattrick - a lot more security and error handling stuff to do
@@ -63,7 +64,7 @@ const uploadCsvFile = (req, res, next) => __awaiter(void 0, void 0, void 0, func
     if (!req.file) {
         const error = new Error("No file provided");
         res.status(404);
-        next(error);
+        return next(error);
     }
     const teamRaw = [];
     const fileUrl = req.file.path.replace("\\", "/");
@@ -90,3 +91,18 @@ const uploadCsvFile = (req, res, next) => __awaiter(void 0, void 0, void 0, func
     });
 });
 exports.uploadCsvFile = uploadCsvFile;
+const deleteTeam = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    // Danger zone, don't know yet if I will even implement it. Should get rid of the entire team and all the players.
+    if (!req.params.teamId) {
+        const error = new Error("Team not found");
+        res.status(404);
+        return next(error);
+    }
+    console.log(req.params.teamId);
+    yield team_1.default.findByIdAndRemove(req.params.teamId);
+    yield player_1.default.deleteMany({ team: req.params.teamId });
+    res.status(204).json({
+        message: 'Deleted successfully'
+    });
+});
+exports.deleteTeam = deleteTeam;

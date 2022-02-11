@@ -1,6 +1,7 @@
 import Team from "../models/team";
 import Player, { PlayerType } from "../models/player";
 import { CountryTranslation } from "./translate-countries";
+import { calculateExpiry } from "./actual-age";
 
 export const insertTeamIntoDb = async (team: PlayerType[]) => {
     // Decide team category, refactor into separate function maybe later
@@ -40,10 +41,11 @@ export const insertTeamIntoDb = async (team: PlayerType[]) => {
                     // update old player
                     oldPlayerData.injury = player.injury;
                     oldPlayerData.onTL = player.onTL;
-                    oldPlayerData.TSI = player.TSI;
+                    oldPlayerData.TSI.push(player.TSI[0]);
                     oldPlayerData.experience = player.experience;
                     oldPlayerData.form.push(player.form[0]);
                     oldPlayerData.stamina.push(player.stamina[0]);
+                    oldPlayerData.updates.push(player.updates[0]);
                     oldPlayerData.NTmatches = player.NTmatches;
                     oldPlayerData.U21matches = player.U21matches;
                     oldPlayerData.isInTeam = player.isInTeam;
@@ -84,6 +86,8 @@ export const insertTeamIntoDb = async (team: PlayerType[]) => {
                     passing: player.passing,
                     scoring: player.scoring,
                     setPieces: player.setPieces,
+                    updates: player.updates,
+                    expiry: calculateExpiry(player.age_years,player.age_days),
                     team: existingTeam._id
                 });
                 newPlayer.save();
@@ -125,6 +129,8 @@ export const insertTeamIntoDb = async (team: PlayerType[]) => {
                 passing: player.passing,
                 scoring: player.scoring,
                 setPieces: player.setPieces,
+                updates: player.updates,
+                expiry: calculateExpiry(player.age_years,player.age_days),
                 team: newTeam._id
             });
             // Store players and their reference into the team

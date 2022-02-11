@@ -2,8 +2,8 @@
 import path from "path";
 
 // 3rd party pckg imports
-import express, { NextFunction } from "express";
-import mongoose, { Error } from "mongoose";
+import express from "express";
+import mongoose from "mongoose";
 import multer from "multer";
 import bodyParser from "body-parser";
 
@@ -13,6 +13,7 @@ import { fileStorage, fileFilter } from "./util/uploader";
 // Routes
 import teamRoutes from './routes/teams';
 import playerRoutes from './routes/players';
+import { generalErrorHandler } from "./util/error-handler";
 
 // Variables
 const MONGODB_URI = 'mongodb+srv://arcanus:LL5!JYMcQnS7!at@cluster0.tlpvc.mongodb.net/ht-tool?retryWrites=true&w=majority';
@@ -36,12 +37,8 @@ app.use((req, res, next) => {
 app.use('/', teamRoutes);
 app.use('/player', playerRoutes);
 
-// Error handling: TODO
-// app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
-//     res.json({
-//         message: error.message;
-//     });
-// });
+// Error handling
+app.use(generalErrorHandler);
 
 // DB connection
 mongoose
