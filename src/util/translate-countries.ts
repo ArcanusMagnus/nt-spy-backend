@@ -1,4 +1,40 @@
-export type TranslationObject = {[localCountryName: string]: string}
+import countryJson from "./countryJson.json"
+export type TranslationObject = { [localCountryName: string]: string }
+
+interface CountryKeyValue {
+    key: string;
+    values: string[];
+}
+
+const countryNames: CountryKeyValue[] = [
+    {
+        key: "Italy",
+        values: [
+            "Itálie",
+            "Italia",
+        ],
+    },
+];
+
+const prepareImportMap = (): Map<string, string> => {
+    const result = new Map<string, string>();
+    for (const country of countryNames) {
+        for (const value of country.values) {
+            result.set(value, country.key);
+        }
+    }
+    return result;
+};
+const prepareImportMapFromJson = (): Map<string, string> => {
+    const result = new Map<string, string>();
+    for (const country of Object.keys(countryJson)) {
+        // TODO
+        /*for (const value of country.values) {
+            result.set(value, country.key);
+        }*/
+    }
+    return result;
+};
 
 export const CountryTranslation: TranslationObject = {
     "Itálie": "Italy",
@@ -118,7 +154,7 @@ export const CountryTranslation: TranslationObject = {
     "Mexiko": "Mexico",
     "México": "Mexico",
     "Maroko": "Morocco",
-    "Al Maghrib" : "Morocco",
+    "Al Maghrib": "Morocco",
     "Libanon": "Lebanon",
     "Lubnan": "Lebanon",
     "Mongolsko": "Mongolia",
@@ -183,5 +219,5 @@ export const CountryTranslation: TranslationObject = {
     "Federal Democratic Republic of Ethiopia": "Ethiopia",
     "Srí Lanka": "Sri Lanka",
     "Zambie": "Zambia",
-    "Portoriko": "Puerto Rico"
- }
+    "Portoriko": "Puerto Rico",
+};

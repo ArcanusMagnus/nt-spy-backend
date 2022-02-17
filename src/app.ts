@@ -16,6 +16,7 @@ import { fileFilter, fileStorage } from "./util/uploader";
 import teamRoutes from "./routes/teams";
 import playerRoutes from "./routes/players";
 import { generalErrorHandler } from "./util/error-handler";
+import services from "./services";
 
 dotenv.config();
 
@@ -39,8 +40,12 @@ app.use((req, res, next) => {
     next();
 });
 
+
+const serviceContainer = services();
+
+
 // Route Handling
-app.use("/", teamRoutes);
+app.use("/", teamRoutes(serviceContainer));
 app.use("/player", playerRoutes);
 
 // Error handling
